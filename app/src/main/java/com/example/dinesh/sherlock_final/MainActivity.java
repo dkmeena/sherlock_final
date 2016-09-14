@@ -367,7 +367,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             File file = new File(getExternalFilesDir(null).toString());
             file.mkdirs();
             File f = new File(file, fname.getText().toString() + ".txt");
-            //Log.d("nkn", String.valueOf(fname));
             FileWriter fw = new FileWriter(f, true);
             BufferedWriter out = new BufferedWriter(fw);
             out.append(data);
