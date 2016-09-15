@@ -13,6 +13,7 @@ import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Build;
+import android.os.PowerManager;
 import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,6 +23,7 @@ import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.telephony.gsm.GsmCellLocation;
 import android.util.Log;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -62,7 +64,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     Intent intent;
     PendingIntent pendingIntent;
     PendingIntent pIntent;
-
+    public long prev_time;
+    public long curr_time;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -80,14 +83,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
         restart.setOnClickListener(this);
 
 
-        am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        /*am = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
         intent = new Intent(this, Alarm.class);
 
         pIntent = PendingIntent.getBroadcast(this, 0,
-                intent, 0);
+                intent, 0);*/
 
         locationManagerNET = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
         locationManagerGPS = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+
+
 
 
     }
@@ -96,8 +101,23 @@ public class MainActivity extends Activity implements View.OnClickListener {
     LocationListener locationListenerNET = new LocationListener() {
         public void onLocationChanged(Location location) {
 
-//            Toast.makeText(MainActivity.this, "location changed", Toast.LENGTH_SHORT).show();
-             //Log.d("Listener", "Location changed");
+           // Toast.makeText(MainActivity.this, "location changed", Toast.LENGTH_SHORT).show();
+             Log.d("Listener", "Location changed");
+
+
+            curr_time = System.currentTimeMillis();
+
+            if(curr_time - prev_time >= 30000){
+                prev_time = curr_time;
+                Log.d("Alarm","Alarm");
+                PowerManager.WakeLock wakeLock = ((PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE)).newWakeLock(
+                        PowerManager.SCREEN_DIM_WAKE_LOCK |
+                                PowerManager.ACQUIRE_CAUSES_WAKEUP , "WakeLock");
+
+                wakeLock.acquire();
+                wakeLock.release();
+
+            }
 
             Calendar c = Calendar.getInstance();
             int hr = c.get(Calendar.HOUR);
@@ -115,7 +135,6 @@ public class MainActivity extends Activity implements View.OnClickListener {
             netacc = location.getAccuracy();
             netacc = Math.round(netacc * 100);
             netacc = netacc / 100.0;
-
             sfile = sfile + strDate + " || " + hr + "::" + mn + "::" + sec + " || " + gpslat + " || " + gpslon + " || " + gpsacc + " || " + netlat + " || " + netlon + " || " + netacc + " || " + cellid + " || " + operatorName + " || " + rssi + "\n";
             text.setText(strDate + " || " + hr + "::" + mn + "::" + sec + " || " + gpslat + " || " + gpslon + " || " + gpsacc + " || " + netlat + " || " + netlon + " || " + netacc + " || " + cellid + " || " + operatorName + " || " + rssi);
 
@@ -134,8 +153,22 @@ public class MainActivity extends Activity implements View.OnClickListener {
     LocationListener locationListenerGPS = new LocationListener() {
         public void onLocationChanged(Location location) {
 
-//            Toast.makeText(MainActivity.this, "location changed", Toast.LENGTH_SHORT).show();
-            //Log.d("Listener", "Location changed");
+            //Toast.makeText(MainActivity.this, "location changed", Toast.LENGTH_SHORT).show();
+            Log.d("Listener", "Location changed");
+
+            curr_time = System.currentTimeMillis();
+
+            if(curr_time - prev_time >= 30000){
+                prev_time = curr_time;
+                Log.d("Alarm","Alarm");
+                PowerManager.WakeLock wakeLock = ((PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE)).newWakeLock(
+                        PowerManager.SCREEN_DIM_WAKE_LOCK |
+                                PowerManager.ACQUIRE_CAUSES_WAKEUP , "WakeLock");
+
+                wakeLock.acquire();
+                wakeLock.release();
+
+            }
 
             Calendar c = Calendar.getInstance();
             int hr = c.get(Calendar.HOUR);
@@ -203,6 +236,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             }
 
+            prev_time = System.currentTimeMillis();
 
             locationManagerNET = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
             locationManagerNET.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 0, 0, locationListenerNET);
@@ -214,7 +248,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
             // Alarm
 
-            pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+           /* pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
             int ALARM_TYPE = AlarmManager.RTC_WAKEUP;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M)
@@ -223,7 +257,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 am.setExact(ALARM_TYPE, System.currentTimeMillis() + 30000, pendingIntent);
             else
                 am.set(ALARM_TYPE, System.currentTimeMillis() + 30000, pendingIntent);
-
+    */
 
             Toast.makeText(getApplicationContext(), "Data Collection Started !!!", Toast.LENGTH_SHORT).show();
 
@@ -257,7 +291,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //                    intent, 0);
 
             //AlarmManager alarm = (AlarmManager) this.getSystemService(this.ALARM_SERVICE);
-            am.cancel(pIntent);
+           // am.cancel(pIntent);
 
             Toast.makeText(MainActivity.this, " Data Collection Stopped ", Toast.LENGTH_SHORT).show();
 
@@ -323,7 +357,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
 //            final PendingIntent pIntent = PendingIntent.getBroadcast(this, 0,
 //                    intent, 0);
             //AlarmManager alarm = (AlarmManager) this.getSystemService(this.ALARM_SERVICE);
-            am.cancel(pIntent);
+            //am.cancel(pIntent);
 
             Intent i = getBaseContext().getPackageManager()
                     .getLaunchIntentForPackage(getBaseContext().getPackageName());
@@ -338,7 +372,26 @@ public class MainActivity extends Activity implements View.OnClickListener {
         @Override
         public void onSignalStrengthsChanged(SignalStrength signalStrength) {
             super.onSignalStrengthsChanged(signalStrength);
-            //Log.d("signal","signal changed");
+           // Toast.makeText(getApplicationContext(), "signal changed" , Toast.LENGTH_SHORT).show();
+            Log.d("signal", "signal changed");
+
+
+            curr_time = System.currentTimeMillis();
+
+            if(curr_time - prev_time >= 30000){
+
+                prev_time = curr_time;
+
+                Log.d("Alarm","Alarm");
+                PowerManager.WakeLock wakeLock = ((PowerManager) getApplicationContext().getSystemService(Context.POWER_SERVICE)).newWakeLock(
+                        PowerManager.SCREEN_DIM_WAKE_LOCK |
+                                PowerManager.ACQUIRE_CAUSES_WAKEUP , "WakeLock");
+
+                wakeLock.acquire();
+                wakeLock.release();
+
+            }
+
             int val = -113 + 2 * signalStrength.getGsmSignalStrength();
             rssi = val;
             GsmCellLocation loc = (GsmCellLocation) tm.getCellLocation();
@@ -379,12 +432,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
         }
     }
 
-    @Override
+    /*@Override
     public void onDestroy() {
 
         super.onDestroy();
         // AlarmManager alarm = (AlarmManager) this.getSystemService(this.ALARM_SERVICE);
-        am.cancel(pIntent);
+       am.cancel(pIntent);
 
         stopService(new Intent(this, Alarm.class));
 
@@ -399,18 +452,37 @@ public class MainActivity extends Activity implements View.OnClickListener {
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            locationManagerNET.removeUpdates(locationListenerNET);
+           locationManagerNET.removeUpdates(locationListenerNET);
             locationManagerNET = null;
         }
 
-        if (locationManagerGPS != null) {
+       if (locationManagerGPS != null) {
             locationManagerGPS.removeUpdates(locationListenerGPS);
             locationManagerGPS = null;
         }
-
+//
         if (tm != null)
             tm.listen(MyListener, PhoneStateListener.LISTEN_NONE);
 
+        Log.d("destroy","destroy");
+
+    }*/
+   @Override
+    public void onBackPressed() {
+        moveTaskToBack(true);
     }
+
+    public boolean onKeyDown(int keyCode, KeyEvent event)
+    {
+       // Log.d("sda","sdas");
+        if (keyCode == KeyEvent.KEYCODE_BACK)
+        {
+            moveTaskToBack(true);
+            return true; // return
+        }
+
+        return false;
+    }
+
 
 }

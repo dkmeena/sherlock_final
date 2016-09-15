@@ -8,17 +8,19 @@ import android.content.Intent;
 import android.os.Build;
 import android.os.PowerManager;
 import android.util.Log;
+import android.widget.Toast;
 
 /**
  * Created by dinesh on 11/8/16.
  */
-public class Alarm extends BroadcastReceiver {
+public class Alarm extends BroadcastReceiver     {
     @TargetApi(Build.VERSION_CODES.KITKAT_WATCH)
     @Override
     public void onReceive(Context context, Intent intent) {
 
 
         Log.d("swdsw","Alarm");
+       // Toast.makeText(context, "Alarm", Toast.LENGTH_SHORT).show();
         PowerManager.WakeLock wakeLock = ((PowerManager) context.getSystemService(Context.POWER_SERVICE)).newWakeLock(
                 PowerManager.SCREEN_DIM_WAKE_LOCK |
                         PowerManager.ACQUIRE_CAUSES_WAKEUP , "WakeLock");
